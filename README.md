@@ -7,10 +7,10 @@
 ## 安装
 
 ```bash
-git clone https://github.com/HY-Kai741/zhihang-compass-ui.git "$HOME/.codex/skills/zhihang-compass-ui"
+git clone https://github.com/HY-Kai741/instrument-ui.git "$HOME/.codex/skills/instrument-ui"
 ```
 
-或把整个目录复制到 `$CODEX_HOME/skills/` 下。调用方式：`$zhihang-compass-ui`。
+或把整个目录复制到 `$CODEX_HOME/skills/` 下。调用方式：`$instrument-ui`。
 
 ## 结构
 
