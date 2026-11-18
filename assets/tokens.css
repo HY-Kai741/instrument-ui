@@ -1,0 +1,152 @@
+/* 职航罗盘界面令牌 · v2 */
+
+@font-face{font-family:"IBM Plex Sans";src:url("./fonts/ibm-plex-sans-latin-variable.woff2") format("woff2");font-weight:100 700;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("./fonts/ibm-plex-mono-latin-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("./fonts/ibm-plex-mono-latin-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+
+:root{
+  --bg-void:#080b0e;
+  --bg-panel:#0b1015;
+  --bg-glass:linear-gradient(160deg,rgba(9,23,30,.86),rgba(5,15,21,.82));
+
+  --surface-1:rgba(255,255,255,.02);
+  --surface-2:rgba(255,255,255,.045);
+
+  --line:rgba(255,255,255,.12);
+  --line-strong:rgba(255,255,255,.16);
+  --line-teal:rgba(149,202,204,.14);
+
+  --ink:#e7ecef;
+  --ink-strong:#f4fbff;
+  --ink-muted:#9eafb9;
+  --ink-dim:#7d8a93;
+  --ink-faint:#63878c;
+
+  --accent:#71dacf;
+  --accent-deep:#17a78c;
+  --accent-soft:rgba(113,218,207,.12);
+  --blue:#75c9ec;
+  --gold:#e4ba69;
+  --ok:#65d9b0;
+  --warn:#e4ba69;
+  --danger:#d56d61;
+
+  --sans:"IBM Plex Sans","Segoe UI","Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+  --mono:"IBM Plex Mono","Cascadia Mono","SFMono-Regular",Consolas,monospace;
+
+  --gutter:clamp(22px,4.5vw,56px);
+  --radius-sm:3px;
+  --radius-md:6px;
+  --radius-lg:10px;
+
+  --shadow-float:0 18px 48px rgba(0,7,10,.2),inset 0 1px 0 rgba(255,255,255,.035);
+  --shadow-btn:0 5px 16px rgba(0,0,0,.16);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  min-height:100vh;
+  background:var(--bg-void);
+  color:var(--ink);
+  font:400 14px/1.6 var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;line-height:1.25;letter-spacing:-.02em}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--bg-panel);color:var(--ink);padding:8px 12px;z-index:100}
+.skip-link:focus{left:8px;top:8px}
+
+.label{font:400 10px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.topnav{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:clamp(16px,2.4vw,32px);
+  min-height:58px;padding:10px clamp(18px,3vw,44px);
+  background:var(--bg-panel);
+  border-bottom:1px solid var(--line);
+}
+.topnav .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;color:#fff}
+.topnav nav{display:flex;align-items:center;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+.topnav nav::-webkit-scrollbar{display:none}
+.topnav nav a{
+  position:relative;display:flex;align-items:center;min-height:34px;padding:7px 11px;
+  font-size:12.5px;color:rgba(255,255,255,.66);white-space:nowrap;
+  transition:color .18s ease;
+}
+.topnav nav a:hover{color:#fff}
+.topnav nav a.is-active{color:#fff;font-weight:500}
+.topnav nav a.is-active::after{content:"";position:absolute;left:11px;right:11px;bottom:1px;height:1px;background:#fff}
+
+.ctxbar{
+  display:flex;justify-content:flex-end;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:12px var(--gutter) 8px;
+}
+.ctxbar .field{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.ctxbar select{
+  height:34px;padding:0 12px;border-radius:8px;
+  background:rgba(18,25,32,.86);border:1px solid rgba(150,178,194,.28);
+  color:var(--ink);font:400 12.5px/1 var(--sans);
+}
+
+.main{width:100%;max-width:1240px;margin:0 auto;padding:0 var(--gutter) 104px}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  height:38px;padding:0 16px;border-radius:var(--radius-md);
+  font:600 13px/1 var(--sans);cursor:pointer;
+  transition:background-position .5s cubic-bezier(.4,0,.2,1),
+             border-color .18s ease,transform .18s ease,box-shadow .18s ease;
+}
+.btn-primary{
+  color:#f1fffc;border:1px solid rgba(125,220,208,.4);
+  background-color:#157a6f;
+  background-image:linear-gradient(90deg,#17a78c 0%,#3ac8b4 30%,#6fd9cc 50%,#3ac8b4 70%,#17a78c 100%);
+  background-size:300% 100%;background-position:0 0;background-repeat:no-repeat;
+  box-shadow:var(--shadow-btn),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.btn-primary:hover{background-position:100% 0;border-color:rgba(150,241,227,.56);transform:translateY(-1px)}
+.btn-primary::after{content:"→";font-family:var(--mono);font-size:12px;color:#bff6ed;transition:transform .18s ease}
+.btn-primary:hover::after{transform:translateX(2px)}
+.btn-ghost{color:#fff;background:transparent;border:1px solid rgba(255,255,255,.22)}
+.btn-ghost:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.5)}
+.btn-danger{color:#fff;background:#b42318;border:1px solid #b42318}
+
+.panel-glass{
+  background:var(--bg-glass);
+  border:1px solid rgba(129,190,194,.19);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-float);
+  backdrop-filter:blur(10px);
+  overflow:hidden;
+}
+.panel-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  padding:17px 20px 15px;
+  border-bottom:1px solid var(--line-teal);
+  background:rgba(255,255,255,.018);
+}
+.panel-head h2{font-size:15px;color:var(--ink-strong)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:2px 9px;border-radius:999px;border:1px solid transparent;
+  font:500 11px/1.6 var(--mono);letter-spacing:.04em;white-space:nowrap;
+}
+.chip-ok{color:var(--ok);background:rgba(101,217,176,.1);border-color:rgba(101,217,176,.24)}
+.chip-warn{color:var(--warn);background:rgba(228,186,105,.1);border-color:rgba(228,186,105,.24)}
+.chip-danger{color:var(--danger);background:rgba(213,109,97,.1);border-color:rgba(213,109,97,.24)}
+.chip-info{color:var(--blue);background:rgba(117,201,236,.08);border-color:rgba(117,201,236,.24)}
+.chip-unknown{color:var(--ink-dim);background:rgba(255,255,255,.04);border-color:var(--line)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}

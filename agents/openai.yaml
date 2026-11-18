@@ -1,0 +1,3 @@
+interface:
+  display_name: "仪器式深色界面"
+  short_description: "把仪器式深色设计语言迁移到任意数据密集产品的前端界面"

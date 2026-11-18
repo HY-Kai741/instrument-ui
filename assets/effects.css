@@ -1,0 +1,133 @@
+/* 材质层：背景、光斑、边线绘制、渐入
+   与 tokens.css 一起引入。页面内容容器需要 position:relative; z-index:3。 */
+
+/* ---------- 1. 背景三层 ---------- */
+
+.bg-nebula{
+  position:fixed;inset:-12%;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 58% 48% at 18% 30%,rgba(38,91,128,.36),transparent 66%),
+    radial-gradient(ellipse 42% 38% at 84% 18%,rgba(132,50,64,.18),transparent 68%),
+    radial-gradient(ellipse 64% 46% at 58% 92%,rgba(38,65,83,.28),transparent 70%);
+  background-size:145% 145%;
+  animation:bg-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes bg-drift{
+  from{transform:translate3d(-1.2%,-1.6%,0) scale(1)}
+  to{transform:translate3d(1.4%,1.2%,0) scale(1.06)}
+}
+
+/* 星轨画布：由 background.js 绘制 */
+.starfield{
+  position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;
+  opacity:.9;mix-blend-mode:screen;
+  filter:saturate(1.12) contrast(1.04) brightness(1.06);
+}
+
+/* 地平线：右上方一颗被遮住的夜面地球
+   贴图 earth-night.jpg 来自 Solar System Scope，CC BY 4.0，见 CREDITS-earth.md */
+.planet{
+  position:fixed;right:-36vw;top:-26vh;z-index:1;pointer-events:none;
+  width:min(1280px,115vw);aspect-ratio:1;border-radius:50%;overflow:hidden;
+  background:radial-gradient(circle at 64% 42%,#071825 0%,#040e17 52%,#020810 100%);
+  box-shadow:
+    0 0 190px 60px rgba(38,91,128,.20),
+    inset 0 0 24px 2px rgba(120,190,255,.22),
+    inset -30px -40px 90px rgba(74,159,232,.18);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.18) 40%,#000 70%,#000 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.18) 40%,#000 70%,#000 100%);
+  opacity:.86;
+}
+.planet::before{
+  content:"";position:absolute;inset:0;
+  background:url("./earth-night.jpg") repeat-x 0 50%/50% 100%;
+  mix-blend-mode:screen;
+  filter:saturate(1.2) contrast(1.08) brightness(1.18);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,transparent 52%,rgba(0,0,0,.45) 68%,#000 84%);
+  mask-image:radial-gradient(circle at 50% 50%,transparent 52%,rgba(0,0,0,.45) 68%,#000 84%);
+  animation:planet-spin 260s linear infinite;
+  will-change:background-position;
+}
+.planet::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,rgba(0,0,0,0) 26%,rgba(2,6,10,.5) 70%,rgba(1,4,7,.94) 100%);
+  box-shadow:inset 0 0 90px 12px rgba(2,6,10,.9),inset 0 0 48px 4px rgba(74,159,232,.14);
+}
+@keyframes planet-spin{
+  from{background-position-x:0%}
+  to{background-position-x:-100%}
+}
+
+/* 顶部压暗，保证顶栏与正文对比度 */
+.bg-veil{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(180deg,rgba(4,7,10,.04) 0%,rgba(4,7,10,.28) 58%,rgba(4,7,10,.68) 100%);
+}
+
+/* 渐进：区块入场时轻微上移淡入 */
+.reveal{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .6s cubic-bezier(.2,.75,.25,1),transform .6s cubic-bezier(.2,.75,.25,1);
+  transition-delay:calc(var(--i,0) * 70ms);
+}
+.reveal.is-in{opacity:1;transform:none}
+
+/* ---------- 2. 悬停材质 ---------- */
+
+/* 鼠标跟随光斑 + 边线绘制 + 2px 抬升。背景色仍是透明的，可叠加在任意面板上。 */
+.spot{
+  position:relative;isolation:isolate;
+  --mx:50%;--my:50%;
+  background-image:
+    linear-gradient(90deg,transparent,rgba(113,218,207,.9),transparent),
+    linear-gradient(180deg,rgba(113,218,207,.9),transparent);
+  background-position:left top,left top;
+  background-size:0% 1px,1px 0%;
+  background-repeat:no-repeat;
+  transition:
+    transform .22s cubic-bezier(.2,.75,.25,1),
+    background-color .22s ease,
+    background-size .45s cubic-bezier(.2,.75,.25,1),
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+.spot::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;
+  background:radial-gradient(220px circle at var(--mx) var(--my),rgba(113,218,207,.08),transparent 62%);
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+.spot:hover{
+  transform:translateY(-2px);
+  background-size:100% 1px,1px 100%;
+  background-color:rgba(255,255,255,.028);
+  border-color:rgba(113,218,207,.34);
+  box-shadow:0 12px 28px rgba(0,0,0,.22),0 0 0 1px rgba(113,218,207,.12);
+}
+.spot:hover::after{opacity:1}
+
+/* 行式元素只抬 1px，避免整块列表跳动 */
+.spot-row:hover{transform:translateY(-1px)}
+
+/* 按钮扫光：配合 tokens.css 的 300% 渐变使用 */
+@keyframes btn-sheen{
+  from{background-position:-100% 0,0 0}
+  to{background-position:100% 0,0 0}
+}
+
+/* ---------- 3. 关闭动效 ---------- */
+
+@media (prefers-reduced-motion:reduce){
+  .bg-nebula{animation:none}
+  .starfield{display:none}
+  .planet::before{animation:none}
+  .planet{opacity:.55}
+  .spot:hover{transform:none}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+
+@media (max-width:900px){
+  .planet{display:none}
+  .starfield{opacity:.6}
+}

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>设备遥测 · 材质层示例</title>
+<link rel="stylesheet" href="tokens.css" />
+<link rel="stylesheet" href="effects.css" />
+<style>
+  /* 示例页自己的版式。换项目时只改这一段，材质层不动。 */
+  .page{position:relative;z-index:3;min-height:100vh}
+
+  .topnav .brand{display:flex;align-items:baseline;gap:9px}
+  .topnav .brand small{font:400 10px/1 var(--mono);letter-spacing:.16em;color:var(--ink-faint)}
+
+  .hero{padding:clamp(48px,6vw,84px) 0 0;border-bottom:1px solid var(--line)}
+  .kicker{margin:0 0 16px;font:400 10px/1 var(--mono);letter-spacing:.18em;color:var(--blue)}
+  .hero h1{
+    margin:0;font-size:clamp(46px,6.6vw,92px);font-weight:600;
+    line-height:1.06;letter-spacing:-.03em;color:var(--ink-strong);
+  }
+  .hero .lede{max-width:560px;margin:18px 0 34px;color:var(--ink-muted);font-size:13.5px;line-height:1.7}
+
+  .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
+  .metric{padding:22px 18px 25px;border-right:1px solid var(--line);text-align:center;border-radius:0;border-top:0;border-left:0;border-bottom:0}
+  .metric:last-child{border-right:0}
+  .metric .idx{display:block;margin-bottom:17px;font:400 10px/1 var(--mono);letter-spacing:.1em;color:var(--blue)}
+  .metric .k{font-size:11.5px;color:var(--ink-muted)}
+  .metric .v{margin-top:5px;font:500 clamp(22px,2.2vw,30px)/1.2 var(--mono);color:var(--ink-strong);letter-spacing:-.035em}
+  .metric .s{margin-top:5px;font-size:11.5px;color:var(--ink-muted)}
+
+  .console{margin-top:26px;padding:18px 20px;display:grid;gap:12px}
+  .console .search{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .console input{
+    flex:1;min-width:220px;height:38px;padding:0 12px;
+    background:#0b1117;border:1px solid #3b4852;border-radius:3px;
+    color:var(--ink);font:400 13px/1 var(--sans);
+  }
+  .console input:focus{outline:none;border-color:#7aa9c5;box-shadow:0 0 0 3px rgba(88,148,182,.16)}
+  .facets{display:flex;gap:8px;flex-wrap:wrap}
+  .facet{
+    padding:4px 10px;border-radius:3px;border:1px solid var(--line);
+    background:rgba(255,255,255,.02);color:var(--ink-muted);
+    font:400 11.5px/1.6 var(--sans);cursor:pointer;
+  }
+  .facet.is-on{color:var(--accent);border-color:rgba(113,218,207,.36);background:var(--accent-soft)}
+
+  .workspace{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:18px;margin-top:18px;align-items:start}
+  .ledger{min-height:420px}
+
+  .row{
+    display:grid;grid-template-columns:minmax(0,1fr) 112px 92px 96px;
+    gap:14px;align-items:center;padding:17px 20px;
+    border-top:0;border-left:0;border-right:0;border-bottom:1px solid rgba(149,202,204,.12);
+    border-radius:0;background-color:transparent;
+  }
+  .row:last-of-type{border-bottom:0}
+  .row h3{margin:0 0 4px;font-size:14.5px;font-weight:500;color:var(--ink-strong);letter-spacing:-.01em}
+  .row .sub{margin:0;font-size:12px;color:var(--ink-dim)}
+  .row .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+  .row .reading{font:400 12px/1.6 var(--mono);color:var(--ink-muted)}
+  .row .reading b{display:block;font-weight:500;color:var(--ink)}
+  .row .act{justify-self:end;font:500 12px/1 var(--mono);color:var(--accent)}
+
+  .pager{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--line-teal)}
+  .pager span{font:400 11px/1 var(--mono);color:var(--ink-dim)}
+
+  .inspector{padding:20px}
+  .inspector h2{margin:8px 0 0;font-size:19px;letter-spacing:-.02em;color:var(--ink-strong)}
+  .inspector .org{margin:6px 0 16px;font-size:12.5px;color:var(--ink-muted)}
+  .kv{
+    display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px 12px;
+    margin:18px 0;padding:16px 0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .kv dt{margin:0;font:400 10px/1.6 var(--mono);letter-spacing:.1em;color:var(--ink-faint)}
+  .kv dd{margin:0;font-size:12.5px;color:var(--ink)}
+
+  .events{display:grid;gap:0;margin:0 0 18px;padding:0;list-style:none}
+  .events li{display:grid;grid-template-columns:14px minmax(0,1fr) 62px;gap:8px;align-items:baseline;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+  .events li:last-child{border-bottom:0}
+  .events .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:6px}
+  .events .dot.warn{background:var(--warn)}
+  .events .dot.dim{background:var(--ink-faint)}
+  .events p{margin:0;font-size:12.5px;color:var(--ink)}
+  .events time{font:400 10.5px/1.6 var(--mono);color:var(--ink-faint);text-align:right}
+
+  .note{margin:14px 0 16px;font-size:11.5px;line-height:1.7;color:var(--ink-dim)}
+
+  @media (max-width:1180px){
+    .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .metric:nth-child(2){border-right:0}
+    .workspace{grid-template-columns:minmax(0,1fr)}
+  }
+  @media (max-width:900px){
+    .hero h1{font-size:clamp(38px,11vw,58px)}
+    .row{grid-template-columns:minmax(0,1fr) 96px}
+    .row .reading:nth-of-type(1){display:none}
+  }
+  @media (max-width:620px){
+    .row{grid-template-columns:minmax(0,1fr);gap:8px}
+    .row .act{justify-self:start}
+    .metrics{grid-template-columns:minmax(0,1fr)}
+    .metric{border-right:0;border-bottom:1px solid var(--line)}
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<canvas class="starfield" data-starfield aria-hidden="true"></canvas>
+<div class="bg-nebula" aria-hidden="true"></div>
+<div class="planet" aria-hidden="true"></div>
+<div class="bg-veil" aria-hidden="true"></div>
+
+<div class="page">
+  <header class="topnav">
+    <div class="brand">远望<small>TELEMETRY</small></div>
+    <nav aria-label="主导航">
+      <a href="#">概览</a>
+      <a href="#" class="is-active">设备</a>
+      <a href="#">告警</a>
+      <a href="#">工单</a>
+      <a href="#">校准</a>
+    </nav>
+    <button class="btn btn-ghost" type="button">导出</button>
+  </header>
+
+  <div class="ctxbar">
+    <div class="field"><span class="label">站点</span>
+      <select><option>华东-03</option></select>
+    </div>
+    <div class="field"><span class="label">时间窗</span>
+      <select><option>最近 24 小时</option></select>
+    </div>
+  </div>
+
+  <main class="main" id="main">
+    <section class="hero reveal">
+      <p class="kicker">TELEMETRY · 2026-11-18 18:40</p>
+      <h1>设备遥测<br>观测台</h1>
+      <p class="lede">按区域和状态筛选网关回传的实时读数；每条读数带采样时间与校准状态。</p>
+
+      <div class="metrics">
+        <div class="metric spot"><span class="idx">01</span><div class="k">在线设备</div><div class="v">1,284</div><div class="s">占全部 98.6%</div></div>
+        <div class="metric spot"><span class="idx">02</span><div class="k">今日告警</div><div class="v">37</div><div class="s">较昨日 +6</div></div>
+        <div class="metric spot"><span class="idx">03</span><div class="k">回传延迟</div><div class="v">82<span style="font-size:13px">ms</span></div><div class="s">P95 210ms</div></div>
+        <div class="metric spot"><span class="idx">04</span><div class="k">数据完整率</div><div class="v">99.2<span style="font-size:13px">%</span></div><div class="s">2 台缺采样</div></div>
+      </div>
+    </section>
+
+    <section class="console panel-glass spot reveal" style="--i:1" aria-label="检索控制台">
+      <div class="search">
+        <label class="label" for="q">关键词</label>
+        <input id="q" type="search" placeholder="设备编号、点位或型号" value="EH-2" />
+        <button class="btn btn-primary" type="button">筛选设备</button>
+      </div>
+      <div class="facets">
+        <button class="facet is-on" type="button">全部 1,284</button>
+        <button class="facet" type="button">在线 1,241</button>
+        <button class="facet" type="button">告警 37</button>
+        <button class="facet" type="button">离线 43</button>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <section class="ledger panel-glass reveal" style="--i:2" aria-label="设备台账">
+        <div class="panel-head"><h2>设备台账</h2><span class="label">1–3 / 128</span></div>
+
+        <article class="row spot spot-row">
+          <div>
+            <h3>EH-2041 · 东区泵站</h3>
+            <p class="sub">压力传感器 · 网关 G-07</p>
+            <div class="meta">
+              <span class="chip chip-ok">在线</span>
+              <span class="chip chip-unknown">已校准 · 11-02</span>
+            </div>
+          </div>
+          <div class="reading"><b>2.41</b>MPa</div>
+          <div class="reading"><b>12</b>秒前</div>
+          <div class="act">查看序列</div>
+        </article>
+
+        <article class="row spot spot-row">
+          <div>
+            <h3>EH-2077 · 南岸阀室</h3>
+            <p class="sub">流量计 · 网关 G-11</p>
+            <div class="meta">
+              <span class="chip chip-warn">告警 3 条</span>
+              <span class="chip chip-unknown">未校准</span>
+            </div>
+          </div>
+          <div class="reading"><b>0.62</b>m³/s</div>
+          <div class="reading"><b>4</b>分钟前</div>
+          <div class="act">查看序列</div>
+        </article>
+
+        <article class="row spot spot-row">
+          <div>
+            <h3>EH-1130 · 北线监测点</h3>
+            <p class="sub">液位计 · 网关 G-03</p>
+            <div class="meta">
+              <span class="chip chip-danger">离线</span>
+              <span class="chip chip-unknown">最后数据 2 小时前</span>
+            </div>
+          </div>
+          <div class="reading"><b>—</b>无读数</div>
+          <div class="reading"><b>2</b>小时前</div>
+          <div class="act">查看诊断</div>
+        </article>
+
+        <div class="pager"><span>第 1 / 43 页</span><button class="btn btn-ghost" type="button">下一页</button></div>
+      </section>
+
+      <aside class="inspector panel-glass reveal" style="--i:3" aria-label="设备核对">
+        <p class="label">CURRENT DEVICE</p>
+        <h2>EH-2041</h2>
+        <p class="org">东区泵站 · 压力传感器</p>
+
+        <dl class="kv">
+          <dt>型号</dt><dd>PT-300X</dd>
+          <dt>固件</dt><dd class="mono">2.4.1</dd>
+          <dt>采样</dt><dd class="mono">2026-11-18 18:40:12</dd>
+          <dt>状态</dt><dd><span class="chip chip-ok">数据完整</span></dd>
+        </dl>
+
+        <p class="label" style="margin-bottom:6px">最近事件</p>
+        <ul class="events">
+          <li><span class="dot"></span><p>读数恢复正常区间</p><time>18:32</time></li>
+          <li><span class="dot warn"></span><p>压力瞬时超过 2.6MPa</p><time>18:04</time></li>
+          <li><span class="dot dim"></span><p>完成零点校准</p><time>11-02</time></li>
+        </ul>
+
+        <p class="note">读数来自网关采样；「未校准」仅表示缺少校准记录，不代表设备失效。离线设备显示最后一次成功回传时间。</p>
+        <button class="btn btn-primary" type="button">查看原始序列</button>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script src="background.js"></script>
+</body>
+</html>
